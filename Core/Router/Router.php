@@ -6,9 +6,9 @@
  * and open the template in the editor.
  */
 
-namespace App\Router;
+namespace Core\Router;
 
-use App\Router\RouterException;
+use Core\Router\RouterException;
 
 /**
  * Description of Router
@@ -23,7 +23,7 @@ class Router {
     private $routes = [];
     private $namedRoutes = [];
 
-    public function __construct($url) {
+    public function __construct($url = null) {
         $this->url = $url;
     }
 
@@ -67,7 +67,6 @@ class Router {
         foreach ($this->routes[$_SERVER['REQUEST_METHOD']] as $route) {
             if ($route->match($this->url)) {
                 $route->call();
-                pr($route->data());
                 $error = false;
             }
         }

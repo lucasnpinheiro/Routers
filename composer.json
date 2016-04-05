@@ -2,13 +2,14 @@
     "name": "lucas/routers",
     "authors": [
         {
-            "name": "Lucas",
+            "name": "Lucas Nunes Pinto Pinheiro",
             "email": "lucasnpinheiro@gmail.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "App\\": "src"
+            "App\\": "src",
+            "Core\\": "Core"
         }
     },
     "require": {}

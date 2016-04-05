@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace App\Router;
+namespace Core\Router;
 
 /**
  * Description of RouterException

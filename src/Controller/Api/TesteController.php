@@ -8,14 +8,33 @@
 
 namespace App\Controller\Api;
 
+use Core\Controller\Controller;
+
 /**
  * Description of TesteController
  *
  * @author lucas
  */
-class TesteController {
+class TesteController extends Controller {
+
     //put your code here
-    public function index(){
+    public function index() {
+        $this->loadModel('Clientes');
+        $find = $this->Clientes->where('id', 1)->contain('Contatos')->find();
+        debug($find['Contatos.0.valor']);
+        debug($find['Contatos'][0]['valor']);
+        debug($find->Contatos[0]->valor);
+        debug($find->get('Contatos.0'));
         echo 'Index';
     }
+    
+    public function add() {
+        $this->loadModel('Clientes');
+        $this->loadModel('Contatos');
+        $find = $this->Clientes->where('id', 1)->contain('Contatos')->find();
+        $find->Contatos[0]->valor = 1639191956;
+        $this->Contatos->save($find->Contatos[0]);
+        echo 'Add';
+    }
+
 }
