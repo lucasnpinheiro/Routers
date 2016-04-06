@@ -47,6 +47,29 @@ class Router {
         return $this->add($path, $callable, $name, $_SERVER['REQUEST_METHOD']);
     }
 
+    public function descobre() {
+        $this->diretorios();
+        return $this->url;
+    }
+
+    public function diretorios() {
+        $path = explode('/', trim($this->url, '/'));
+        if (count($path) > 0) {
+            $dir = '';
+            foreach ($path as $key => $value) {
+                if (is_dir('src/Controller' . DIRECTORY_SEPARATOR . $dir . $value)) {
+                    $dir .= $value . DIRECTORY_SEPARATOR;
+                } else {
+                    $this->get($this->url, ['controller' => $dir . $value, 'action' => (!empty($path[$key + 1]) ? $path[$key + 1] : 'index')]);
+                    break;
+                }
+            }
+            return '/' . trim($dir, '/');
+        } else {
+            return '';
+        }
+    }
+
     private function add($path, $callable, $name, $method) {
         $route = new Route($path, $callable);
         $this->routes[$method][] = $route;

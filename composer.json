@@ -9,8 +9,11 @@
     "autoload": {
         "psr-4": {
             "App\\": "src",
-            "Core\\": "Core"
+            "Core\\": "Core",
+            "test\\": "Test"
         }
     },
-    "require": {}
+    "require": {
+        "phpunit/phpunit": "5.3.0"
+    }
 }

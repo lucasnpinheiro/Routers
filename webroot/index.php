@@ -65,7 +65,9 @@ if (!defined('WEBROOT')) {
 require_once ROOT . 'vendor/autoload.php';
 
 $router = new \Core\Router\Router($_GET['url']);
-$router->get('/', 'Api\ Teste');
-$router->get('/add', 'Api\Teste#add');
+$router->auto('/', 'Api\Teste');
+$router->auto('/add', 'Api\Teste#add');
+
+$router->descobre();
 
 $router->run();
