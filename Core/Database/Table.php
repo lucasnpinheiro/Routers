@@ -2,46 +2,179 @@
 
 namespace Core\Database;
 
-use Core\Database\Database;
-
-//use Core\Request;
+use Core\Utilitys\Configure;
+use Slim\PDO\Statement\SelectStatement;
+use Slim\PDO\Statement\InsertStatement;
+use Slim\PDO\Statement\UpdateStatement;
+use Slim\PDO\Statement\DeleteStatement;
 
 /**
  * Classe que realiza o ponte da classe databese para uma classe pré para tratamentos de algumas informações genericas no banco de dados.
  *
  * @author Lucas Pinheiro
  */
-class Table extends Database {
+class Table extends \Slim\PDO\Database {
 
-    public $filterArgs = [];
+    protected $table = null;
+    public $primary_key = 'id';
+    public $classe = null;
+    public $alias = null;
+    public $schema = [];
 
-    /**
-     * Função de auto execução ao startar a classe.
-     */
     public function __construct() {
-        parent::__construct();
+        Configure::load('database');
+        parent::__construct(Configure::read('database.drive') . ':host=' . Configure::read('database.host') . ';dbname=' . Configure::read('database.banco') . ';charset=utf8', Configure::read('database.usuario'), Configure::read('database.senha'));
+        $class = explode('\\', get_class($this));
+        $class = end($class);
+        $this->classe = substr($class, 0, -5) . 'Entity';
+        $this->alias = substr($class, 0, -5);
+        $this->classe = '\\App\\Model\\Entity\\' . $this->classe;
+        $this->schema = $this->columnsTypes();
     }
 
-    /*public function search() {
-        if (!empty($this->filterArgs)) {
-            $r = new Request();
-            foreach ($r->query as $key => $value) {
-                if (isset($this->filterArgs[$key]) and ! empty($this->filterArgs[$key])) {
-                    switch ($this->filterArgs[$key]) {
-                        case 'like':
-                            $this->where($key, $value, 'like');
-                            break;
-                        case 'date':
-                            $this->where('DATE(' . $key . ')', $value, '=');
-                            break;
+    /**
+     * @param array $id
+     *
+     * @return SelectStatement
+     */
+    public function get($id) {
+        $r = $this->select()->where($this->primary_key, '=', $id);
+        return $r->first();
+    }
 
-                        default:
-                            $this->where($key, $value, '=');
-                            break;
+    /**
+     * @param array $columns
+     *
+     * @return SelectStatement
+     */
+    public function select(array $columns = array()) {
+        $r = new Statement\MySelectStatement($this, $columns);
+        $r->from($this->table);
+        return $r;
+    }
+
+    /**
+     * @param array $columns
+     *
+     * @return InsertStatement
+     */
+    public function insert(array $columns = array()) {
+        $r = new InsertStatement($this, $columns);
+        $r->into($this->table);
+        return $r;
+    }
+
+    /**
+     * @param array $pairs
+     *
+     * @return UpdateStatement
+     */
+    public function update(array $pairs = array()) {
+        $r = new UpdateStatement($this, $pairs);
+        $r->table($this->table);
+        return $r;
+    }
+
+    /**
+     * @param array $columns
+     *
+     * @return SaveStatement
+     */
+    public function save(array $columns = array()) {
+        $columns = $this->beforeSave($columns);
+        $r = new Statement\SaveStatement($columns);
+        $r->table($this->table);
+        $r->primaryKey($this->primary_key);
+        $id = $r->execute($this, true);
+        return $this->afterSave($id, $columns, (bool) isset($columns[$this->primary_key]));
+    }
+
+    /**
+     * @param null $id
+     *
+     * @return DeleteStatement
+     */
+    public function delete($id) {
+        $columns = $this->get($id);
+        $columns = $this->beforeDelete($id, $columns);
+        $r = new DeleteStatement($this, $this->table);
+        $r->from($this->table);
+        $r->where($this->primary_key, '=', $id);
+        $exec = $r->execute();
+        return $this->afterDelete($id, $columns, (bool) $exec);
+    }
+
+    /**
+     *
+     * @return DeleteStatement
+     */
+    public function deleteAll() {
+        $r = new DeleteStatement($this, $this->table);
+        $r->from($this->table);
+        return $r;
+    }
+
+    public function beforeSave(array $columns = array()) {
+        return $columns;
+    }
+
+    public function afterSave($id, array $columns = array(), $new = false) {
+        return $id;
+    }
+
+    public function beforeDelete($id, array $columns = array()) {
+        return $columns;
+    }
+
+    public function afterDelete($id, array $columns = array(), $success = false) {
+        return $success;
+    }
+
+    public function q($sql) {
+        $r = new Statement\MyQueryStatement($this, $sql);
+        $stmt = $r->execute();
+        return $stmt;
+    }
+
+    /**
+     * 
+     * função que exclui a tabela do banco de dados
+     * 
+     * @return boolean
+     */
+    public function columns() {
+        $c = $this->q('SHOW FULL COLUMNS FROM ' . Configure::read('database.banco') . '.' . $this->table)->fetchAll(\PDO::FETCH_OBJ);
+        if (count($c)) {
+            $co = [];
+            foreach ($c as $key => $value) {
+                $co[$value->Field] = [];
+                foreach ($value as $k => $v) {
+                    if ($k != 'Field') {
+                        $co[$value->Field][strtolower($k)] = $v;
                     }
                 }
             }
+            return $co;
         }
-    }*/
+        return null;
+    }
+
+    /**
+     * 
+     * função que exclui a tabela do banco de dados
+     * 
+     * @return boolean
+     */
+    public function columnsTypes() {
+        $c = $this->q('SHOW FULL COLUMNS FROM ' . Configure::read('database.banco') . '.' . $this->table)->fetchAll(\PDO::FETCH_OBJ);
+        if (count($c)) {
+            $co = [];
+            foreach ($c as $key => $value) {
+                $co[$value->Field] = $value->Type;
+            }
+            return $co;
+        }
+        return null;
+    }
 
 }

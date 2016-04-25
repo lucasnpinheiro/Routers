@@ -2,7 +2,7 @@
 
 namespace App\Model\Entity;
 
-use Core\Database\Entities\Entity;
+use Core\Database\Entity;
 
 class ContatosEntity extends Entity {
 

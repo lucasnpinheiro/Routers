@@ -6,7 +6,7 @@ use Core\Database\Table;
 
 class ContatosTable extends Table {
 
-    public $tabela = 'contatos';
+    protected $table = 'contatos';
 
     public function __construct() {
         parent::__construct();

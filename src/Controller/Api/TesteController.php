@@ -20,14 +20,15 @@ class TesteController extends Controller {
     //put your code here
     public function index() {
         $this->loadModel('Clientes');
-        $find = $this->Clientes->where('id', 1)->contain('Contatos')->find();
-        debug($find['Contatos.0.valor']);
-        debug($find['Contatos'][0]['valor']);
-        debug($find->Contatos[0]->valor);
-        debug($find->get('Contatos.0'));
+        $find = $this->Clientes->select()->where('nome', '=', 'aa')->contain(['Contatos'])->debug();
+        debug($find);
+
+        //$add = $this->Clientes->save(['id' => 11, 'nome' => '11 Teste Lucas']);
+        //debug($add);
+
         echo 'Index';
     }
-    
+
     public function add() {
         $this->loadModel('Clientes');
         $this->loadModel('Contatos');

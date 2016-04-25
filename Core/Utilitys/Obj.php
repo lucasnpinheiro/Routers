@@ -83,6 +83,13 @@ class Obj implements \ArrayAccess, \Countable, \Iterator, \Serializable {
     /**
      * {@inheritdoc}
      */
+    public function isEmpty() {
+        return (bool) (count($this->items) > 0 ? false : true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function current() {
         $keys = array_keys($this->items);
         return $this->items[$keys[$this->position]];

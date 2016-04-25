@@ -57,11 +57,14 @@ class Router {
         if (count($path) > 0) {
             $dir = '';
             foreach ($path as $key => $value) {
-                if (is_dir('src/Controller' . DIRECTORY_SEPARATOR . $dir . $value)) {
-                    $dir .= $value . DIRECTORY_SEPARATOR;
-                } else {
-                    $this->get($this->url, ['controller' => $dir . $value, 'action' => (!empty($path[$key + 1]) ? $path[$key + 1] : 'index')]);
-                    break;
+                $value = trim($value);
+                if ($value != '') {
+                    if (is_dir('src/Controller' . DIRECTORY_SEPARATOR . $dir . $value)) {
+                        $dir .= $value . DIRECTORY_SEPARATOR;
+                    } else {
+                        $this->auto($this->url, ['controller' => $dir . $value, 'action' => (!empty($path[$key + 1]) ? $path[$key + 1] : 'index')]);
+                        break;
+                    }
                 }
             }
             return '/' . trim($dir, '/');

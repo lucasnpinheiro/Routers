@@ -6,14 +6,10 @@ use Core\Database\Table;
 
 class ClientesTable extends Table {
 
-    public $tabela = 'clientes';
+    protected $table = 'clientes';
 
     public function __construct() {
         parent::__construct();
-    }
-
-    public function beforeSave() {
-        
     }
 
 }
