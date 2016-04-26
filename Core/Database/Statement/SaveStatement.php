@@ -19,6 +19,7 @@ class SaveStatement {
     protected $_columns = [];
     protected $table = null;
     protected $primary_key = 'id';
+    protected $dbh = null;
 
     /**
      * Constructor.
@@ -26,7 +27,8 @@ class SaveStatement {
      * @param Database $dbh
      * @param array    $pairs
      */
-    public function __construct(array $columns) {
+    public function __construct($columns = array(), Database $dbh) {
+        $this->dbh = $dbh;
         $this->_columns = $columns;
     }
 
@@ -39,16 +41,34 @@ class SaveStatement {
     }
 
     public function execute(\Core\Database\Table $r, $retorno = true) {
+        $columns = $this->trataColumns();
         $id = 0;
-        if (isset($this->_columns[$this->primary_key])) {
-            $update = $r->update($this->_columns)->table($this->table)->where($this->primary_key, '=', $this->_columns[$this->primary_key]);
+        if (isset($columns[$this->primary_key])) {
+            $columns[\Core\Utilitys\Configure::read('database.columModified')] = date('Y-m-d H:i:s');
+            $update = $r->update($columns)->table($this->table)->where($this->primary_key, '=', $columns[$this->primary_key]);
             $update->execute();
-            $id = $this->_columns[$this->primary_key];
+            $id = $columns[$this->primary_key];
         } else {
-            $insert = $r->insert(array_keys($this->_columns))->into($this->table)->values(array_values($this->_columns));
+            $columns[\Core\Utilitys\Configure::read('database.columCreated')] = date('Y-m-d H:i:s');
+            $insert = $r->insert(array_keys($columns))->into($this->table)->values(array_values($columns));
             $id = $insert->execute($retorno);
         }
         return $r->get($id);
+    }
+
+    private function trataColumns() {
+
+        $columns = [];
+        foreach ($this->dbh->schema as $key => $value) {
+            if (isset($this->_columns[$key])) {
+                $columns[$key] = $this->_columns[$key]->__toString();
+                if($columns[$key] === ''){
+                    $columns[$key] = null;
+                }
+            }
+        }
+        debug($columns);
+        return $columns;
     }
 
 }

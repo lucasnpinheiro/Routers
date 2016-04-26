@@ -12,4 +12,6 @@ $config = [
     'log' => true,
     'cache' => false,
     'cacheTime' => '5 minutes',
+    'columCreated' => 'created',
+    'columModified' => 'modified',
 ];

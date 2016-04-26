@@ -57,7 +57,18 @@ class Obj implements \ArrayAccess, \Countable, \Iterator, \Serializable {
         if (is_null($offset)) {
             $this->items[] = $value;
         } else {
-            $this->items[$offset] = $value;
+            if (!$this->offsetExists($offset)) {
+                $this->items[$offset] = $value;
+            } else {
+                if (method_exists($this->items[$offset], 'setValue') === true) {
+                    $c = '\\' . get_class($this->items[$offset]);
+                    $m = new $c($value);
+                    unset($this->items[$offset]);
+                    $this->items[$offset] = $m;
+                } else {
+                    $this->items[$offset] = $value;
+                }
+            }
         }
     }
 
@@ -234,15 +245,15 @@ class Obj implements \ArrayAccess, \Countable, \Iterator, \Serializable {
         }
     }
 
-    public function object_to_array($data) {
-        if (is_array($data) || is_object($data)) {
-            $result = array();
-            foreach ($data as $key => $value) {
-                $result[$key] = $this->object_to_array($value);
+    public function toArray() {
+        foreach ($this->items as $key => $value) {
+            if (is_object($value)) {
+                $result[$key] = $value->__toString();
+            } else {
+                $result[$key] = $value;
             }
-            return $result;
         }
-        return $data;
+        return $result;
     }
 
     public function __get($name) {

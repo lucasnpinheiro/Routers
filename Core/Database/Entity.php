@@ -13,9 +13,63 @@ class Entity {
 
     private $contain = [];
     private $itens = [];
+    private $schema = [];
+    private $primary_key = null;
+
+    public function __construct($schema, $primary_key = null) {
+        $this->schema = $schema;
+        $this->primary_key = $primary_key;
+    }
+
+    private function _preparaValues($name, $value) {
+        $type = strtolower(isset($this->schema[$name]) ? $this->schema[$name] : 'string');
+        if ($type === 'tinyint(1)') {
+            $type = 'boolean';
+        } else {
+            $type = explode('(', $type);
+            $type = $type[0];
+        }
+        switch ($type) {
+            case 'byte':
+            case 'integer':
+            case 'tinyint':
+            case 'smallint':
+            case 'mediumint':
+            case 'bigint':
+                return new Type\Integer($value);
+                break;
+
+            case 'double':
+            case 'float':
+            case 'decimal':
+                return new Type\Float($value);
+                break;
+
+            case 'bool':
+            case 'boolean':
+                return new Type\Boolean($value);
+                break;
+
+            case 'date':
+            case 'datetime':
+            case 'timestamp':
+            case 'time':
+            case 'year':
+                return new Type\DateTime($value);
+                break;
+
+            default:
+                return new Type\String($value);
+                break;
+        }
+    }
 
     public function __set($name, $value) {
-        $this->itens[$name] = $value;
+        if(!isset($this->{$name})){
+        $this->itens[$name] = $this->_preparaValues($name, $value);
+    } else {
+        $this->{$name} = $value;
+    }
     }
 
     public function __get($name) {

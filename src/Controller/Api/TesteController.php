@@ -20,13 +20,8 @@ class TesteController extends Controller {
     //put your code here
     public function index() {
         $this->loadModel('Clientes');
-        $find = $this->Clientes->select()->where('nome', '=', 'aa')->contain(['Contatos'])->debug();
+        $find = $this->Clientes->get(1);
         debug($find);
-
-        //$add = $this->Clientes->save(['id' => 11, 'nome' => '11 Teste Lucas']);
-        //debug($add);
-
-        echo 'Index';
     }
 
     public function add() {

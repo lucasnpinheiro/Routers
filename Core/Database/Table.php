@@ -80,9 +80,9 @@ class Table extends \Slim\PDO\Database {
      *
      * @return SaveStatement
      */
-    public function save(array $columns = array()) {
+    public function save($columns = array()) {
         $columns = $this->beforeSave($columns);
-        $r = new Statement\SaveStatement($columns);
+        $r = new Statement\SaveStatement($columns, $this);
         $r->table($this->table);
         $r->primaryKey($this->primary_key);
         $id = $r->execute($this, true);
@@ -114,19 +114,19 @@ class Table extends \Slim\PDO\Database {
         return $r;
     }
 
-    public function beforeSave(array $columns = array()) {
+    public function beforeSave($columns = array()) {
         return $columns;
     }
 
-    public function afterSave($id, array $columns = array(), $new = false) {
+    public function afterSave($id, $columns = array(), $new = false) {
         return $id;
     }
 
-    public function beforeDelete($id, array $columns = array()) {
+    public function beforeDelete($id, $columns = array()) {
         return $columns;
     }
 
-    public function afterDelete($id, array $columns = array(), $success = false) {
+    public function afterDelete($id, $columns = array(), $success = false) {
         return $success;
     }
 
@@ -175,6 +175,16 @@ class Table extends \Slim\PDO\Database {
             return $co;
         }
         return null;
+    }
+
+    public function newEntity() {
+        $c = new $this->classe($this->schema);
+        foreach ($this->schema as $k => $v) {
+            $c->$k = '';
+        }
+        $c->populaSet();
+        $retorno = $c->itens();
+        return new \Core\Utilitys\Obj($retorno);
     }
 
 }

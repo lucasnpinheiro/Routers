@@ -49,12 +49,11 @@ class MySelectStatement extends \Slim\PDO\Statement\SelectStatement {
         if (count($return) === 0) {
             return new \Core\Utilitys\Obj(array());
         }
-        return new \Core\Utilitys\Obj($return);
+        return new \Core\Utilitys\Obj($this->trataResult($return));
     }
 
     private function trataResult($result) {
-        $c = new $this->dbh->classe();
-        $c->primary_key = $this->dbh->primary_key;
+        $c = new $this->dbh->classe($this->dbh->schema, $this->dbh->primary_key);
         foreach ($result as $k => $v) {
             $c->$k = $v;
         }
