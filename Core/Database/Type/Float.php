@@ -20,11 +20,14 @@ class Float extends Integer {
         $value = $this->getValue();
         if (trim($value) == '' or is_null($value)) {
             $value = null;
-        }
-        if (is_numeric($value)) {
-            $value = floatval($value);
         } else {
-            $value = null;
+            if (!is_numeric($value)) {
+                if (stripos($value, ',') !== FALSE) {
+                    $value = str_replace('.', '', $value);
+                    $value = str_replace(',', '.', $value);
+                }
+            }
+            $value = floatval($value);
         }
         $this->setValue($value);
     }

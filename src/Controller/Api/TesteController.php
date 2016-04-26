@@ -20,8 +20,10 @@ class TesteController extends Controller {
     //put your code here
     public function index() {
         $this->loadModel('Clientes');
-        $find = $this->Clientes->get(1);
-        debug($find);
+        //$find = $this->Clientes->get(1);
+        $find = $this->Clientes->select()->whereLike('nome', '%lucas')->all();
+        $find[0]->valor = '11.35';
+        debug($find[0]->valor);
     }
 
     public function add() {

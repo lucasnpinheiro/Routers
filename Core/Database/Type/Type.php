@@ -64,7 +64,9 @@ class Type {
     }
 
     public function soundexCompare($str) {
-        return soundex($this->getValue()) == soundex($str);
+        $str1 = metaphone($this->getValue());
+        $str2 = metaphone($str);
+        return $str1 == $str2;
     }
 
     public function similarText($str) {
