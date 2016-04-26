@@ -41,34 +41,14 @@ class SaveStatement {
     }
 
     public function execute(\Core\Database\Table $r, $retorno = true) {
-        $columns = $this->trataColumns();
+        $columns = $this->_columns;
         $id = 0;
         if (isset($columns[$this->primary_key])) {
-            $columns[\Core\Utilitys\Configure::read('database.columModified')] = date('Y-m-d H:i:s');
-            $update = $r->update($columns)->table($this->table)->where($this->primary_key, '=', $columns[$this->primary_key]);
-            $update->execute();
-            $id = $columns[$this->primary_key];
+            $id = $r->update($columns);
         } else {
-            $columns[\Core\Utilitys\Configure::read('database.columCreated')] = date('Y-m-d H:i:s');
-            $insert = $r->insert(array_keys($columns))->into($this->table)->values(array_values($columns));
-            $id = $insert->execute($retorno);
+            $id = $r->insert($columns);
         }
         return $r->get($id);
-    }
-
-    private function trataColumns() {
-
-        $columns = [];
-        foreach ($this->dbh->schema as $key => $value) {
-            if (isset($this->_columns[$key])) {
-                $columns[$key] = $this->_columns[$key]->__toString();
-                if($columns[$key] === ''){
-                    $columns[$key] = null;
-                }
-            }
-        }
-        debug($columns);
-        return $columns;
     }
 
 }

@@ -21,9 +21,11 @@ class TesteController extends Controller {
     public function index() {
         $this->loadModel('Clientes');
         //$find = $this->Clientes->get(1);
-        $find = $this->Clientes->select()->whereLike('nome', '%lucas')->all();
-        $find[0]->valor = '11.35';
-        debug($find[0]->valor);
+        //$find->nome = 'Teste AAAA BBBB';
+        $find = [];
+        $find['id'] = '20';
+        $find['nome'] = 'Novo teste de 20';
+        debug($find = $this->Clientes->save($find));
     }
 
     public function add() {

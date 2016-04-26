@@ -58,10 +58,17 @@ class Table extends \Slim\PDO\Database {
      *
      * @return InsertStatement
      */
-    public function insert(array $columns = array()) {
-        $r = new InsertStatement($this, $columns);
+    public function insert($columns = array()) {
+        $columns = $this->trataColumns($columns);
+        if (array_key_exists(\Core\Utilitys\Configure::read('database.columCreated'), $this->schema)) {
+            if (!array_key_exists(\Core\Utilitys\Configure::read('database.columCreated'), $columns)) {
+                $columns[\Core\Utilitys\Configure::read('database.columCreated')] = date('Y-m-d H:i:s');
+            }
+        }
+        $r = new Statement\MyInsertStatement($this, array_keys($columns));
         $r->into($this->table);
-        return $r;
+        $insert = $r->values(array_values($columns));
+        return $insert->execute(true);
     }
 
     /**
@@ -69,10 +76,18 @@ class Table extends \Slim\PDO\Database {
      *
      * @return UpdateStatement
      */
-    public function update(array $pairs = array()) {
-        $r = new UpdateStatement($this, $pairs);
+    public function update($pairs = array()) {
+        $pairs = $this->trataColumns($pairs);
+        if (array_key_exists(\Core\Utilitys\Configure::read('database.columModified'), $this->schema)) {
+            if (!array_key_exists(\Core\Utilitys\Configure::read('database.columModified'), $pairs)) {
+                $pairs[\Core\Utilitys\Configure::read('database.columModified')] = date('Y-m-d H:i:s');
+            }
+        }
+        $r = new Statement\MyUpdateStatement($this, $pairs);
         $r->table($this->table);
-        return $r;
+        $update = $r->where($this->primary_key, '=', $pairs[$this->primary_key]);
+        $update->execute();
+        return $pairs[$this->primary_key];
     }
 
     /**
@@ -185,6 +200,28 @@ class Table extends \Slim\PDO\Database {
         $c->populaSet();
         $retorno = $c->itens();
         return new \Core\Utilitys\Obj($retorno);
+    }
+
+    private function trataColumns($_columns) {
+        debug($_columns);
+        $columns = [];
+        if (count($_columns) > 0) {
+            if (is_array($this->schema)) {
+                foreach ($this->schema as $key => $value) {
+                    if (isset($_columns[$key])) {
+                        if (method_exists($_columns[$key], '__toString')) {
+                            $columns[$key] = $_columns[$key]->__toString();
+                        } else {
+                            $columns[$key] = $_columns[$key];
+                        }
+                        if ($columns[$key] === '') {
+                            $columns[$key] = null;
+                        }
+                    }
+                }
+            }
+        }
+        return $columns;
     }
 
 }
