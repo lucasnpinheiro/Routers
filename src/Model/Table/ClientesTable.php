@@ -12,4 +12,9 @@ class ClientesTable extends Table {
         parent::__construct();
     }
 
+    public function validation(\Core\Validation\Validation $valitador) {
+        $valitador->add('nome')->min(3)->max(50)->isEmpty();
+        return $valitador;
+    }
+
 }

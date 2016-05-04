@@ -20,6 +20,8 @@ class Table extends \Slim\PDO\Database {
     public $classe = null;
     public $alias = null;
     public $schema = [];
+    public $error = null;
+    private $valid = true;
 
     public function __construct() {
         Configure::load('database');
@@ -97,11 +99,16 @@ class Table extends \Slim\PDO\Database {
      */
     public function save($columns = array()) {
         $columns = $this->beforeSave($columns);
-        $r = new Statement\SaveStatement($columns, $this);
-        $r->table($this->table);
-        $r->primaryKey($this->primary_key);
-        $id = $r->execute($this, true);
-        return $this->afterSave($id, $columns, (bool) isset($columns[$this->primary_key]));
+        $v = $this->_validation($columns);
+        if ($v === true) {
+            $r = new Statement\SaveStatement($columns, $this);
+            $r->table($this->table);
+            $r->primaryKey($this->primary_key);
+            $id = $r->execute($this, true);
+            return $this->afterSave($id, $columns, (bool) isset($columns[$this->primary_key]));
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -192,10 +199,15 @@ class Table extends \Slim\PDO\Database {
         return null;
     }
 
-    public function newEntity() {
+    public function newEntity($dados = []) {
         $c = new $this->classe($this->schema);
         foreach ($this->schema as $k => $v) {
             $c->$k = '';
+        }
+        if (count($dados) > 0) {
+            foreach ($dados as $key => $value) {
+                $c->$key = $value;
+            }
         }
         $c->populaSet();
         $retorno = $c->itens();
@@ -203,7 +215,6 @@ class Table extends \Slim\PDO\Database {
     }
 
     private function trataColumns($_columns) {
-        debug($_columns);
         $columns = [];
         if (count($_columns) > 0) {
             if (is_array($this->schema)) {
@@ -222,6 +233,25 @@ class Table extends \Slim\PDO\Database {
             }
         }
         return $columns;
+    }
+
+    private function _validation($columns) {
+        $v = $this->validation(new \Core\Validation\Validation($columns));
+        $r = $v->run();
+        if ($r === false) {
+            $this->error = $v->error();
+            $this->valid = false;
+            return false;
+        }
+        return true;
+    }
+
+    public function validation(\Core\Validation\Validation $valitador) {
+        return $valitador;
+    }
+
+    public function valid() {
+        return $this->valid;
     }
 
 }

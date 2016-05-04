@@ -24,8 +24,15 @@ class TesteController extends Controller {
         //$find->nome = 'Teste AAAA BBBB';
         $find = [];
         $find['id'] = '20';
-        $find['nome'] = 'Novo teste de 20';
-        debug($find = $this->Clientes->save($find));
+        $find['nome'] = 'Novo teste de 20 ' . date('Y-m-d H:i:s');
+        $find = $this->Clientes->newEntity($find);
+        //$find = $this->Clientes->save($find);
+        if ($this->Clientes->save($find)) {
+            echo 'salvo com o sucesso.';
+        } else {
+            echo 'erro ao salvar os dados.';
+            debug($this->Clientes);
+        }
     }
 
     public function add() {
