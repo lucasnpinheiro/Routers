@@ -13,7 +13,7 @@ class ClientesTable extends Table {
     }
 
     public function validation(\Core\Validation\Validation $valitador) {
-        $valitador->add('nome')->min(3)->max(50)->isEmpty();
+        $valitador->add('nome')->min(3)->max(10)->isEmpty();
         return $valitador;
     }
 
